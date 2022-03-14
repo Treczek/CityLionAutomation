@@ -1,0 +1,228 @@
+- id: 0
+  pattern: 'Batlit '
+  result_value: Ogniwa
+- id: 1
+  pattern: "HD Energy Micha\u0142 Tutaj"
+  result_value: Ogniwa
+- id: 2
+  pattern: Motkowski
+  result_value: Ogniwa
+- id: 3
+  pattern: Prometalum
+  result_value: Ogniwa
+- id: 4
+  pattern: NKON
+  result_value: Ogniwa
+- id: 5
+  pattern: Batimex
+  result_value: Ogniwa
+- id: 6
+  pattern: 'allegro '
+  result_value: "Materia\u0142y produkcyjne"
+- id: 7
+  pattern: 'PAYU '
+  result_value: "Materia\u0142y produkcyjne"
+- id: 8
+  pattern: "FUNDACJA ROZWOJU PRZEDSI\u0118BIORCZO\u015ACI 'TW\xD3J STARTUP'"
+  result_value: "Materia\u0142y produkcyjne"
+- id: 9
+  pattern: EVWHITE
+  result_value: "Materia\u0142y produkcyjne"
+- id: 10
+  pattern: Paypro
+  result_value: "Materia\u0142y produkcyjne"
+- id: 11
+  pattern: NEXUN.PL
+  result_value: "Materia\u0142y produkcyjne"
+- id: 12
+  pattern: ERLI.PL
+  result_value: "Materia\u0142y produkcyjne"
+- id: 13
+  pattern: ECARD.SA
+  result_value: "Materia\u0142y produkcyjne"
+- id: 14
+  pattern: OLX.PL
+  result_value: "Materia\u0142y produkcyjne"
+- id: 15
+  pattern: 'DOTPAY '
+  result_value: "Materia\u0142y produkcyjne"
+- id: 16
+  pattern: LA LINEA ANNA DYMACZEWSKA
+  result_value: "Materia\u0142y produkcyjne"
+- id: 17
+  pattern: "Techmar (sprz\u0119t) "
+  result_value: "Materia\u0142y produkcyjne"
+- id: 18
+  pattern: "BISTI MARCIN BISTU\u0141A"
+  result_value: "Materia\u0142y produkcyjne"
+- id: 19
+  pattern: "GOTIK PAWE\u0141 GO\u0141OS"
+  result_value: "Materia\u0142y produkcyjne"
+- id: 20
+  pattern: HULAJSKLEP.PL
+  result_value: "Materia\u0142y produkcyjne"
+- id: 21
+  pattern: Aliexpress
+  result_value: "Materia\u0142y produkcyjne"
+- id: 22
+  pattern: LEROY MERLIN
+  result_value: "Materia\u0142y produkcyjne"
+- id: 23
+  pattern: 'AKUMULATORYRC.PL '
+  result_value: "Materia\u0142y produkcyjne"
+- id: 24
+  pattern: ALIBABA
+  result_value: "Materia\u0142y produkcyjne"
+- id: 25
+  pattern: ALIPAY
+  result_value: "Materia\u0142y produkcyjne"
+- id: 26
+  pattern: "Integracje technologii Micha\u0142 K\u0119dziora"
+  result_value: "Materia\u0142y produkcyjne"
+- id: 27
+  pattern: Castorama
+  result_value: "Materia\u0142y produkcyjne"
+- id: 28
+  pattern: Tpay
+  result_value: "Materia\u0142y produkcyjne"
+- id: 29
+  pattern: TOYA24.PL
+  result_value: "Materia\u0142y produkcyjne"
+- id: 30
+  pattern: eBay
+  result_value: Prowizje marketplace
+- id: 31
+  pattern: AMAZON
+  result_value: Prowizje marketplace
+- id: 32
+  pattern: DPD
+  result_value: "Wysy\u0142ki"
+- id: 33
+  pattern: Paczkomaty
+  result_value: "Wysy\u0142ki"
+- id: 34
+  pattern: Furgonetka
+  result_value: "Wysy\u0142ki"
+- id: 35
+  pattern: inpost
+  result_value: "Wysy\u0142ki"
+- id: 36
+  pattern: Apaczka
+  result_value: "Wysy\u0142ki"
+- id: 37
+  pattern: "BLIK WYP\u0141ATA ATM KRAJOWY"
+  result_value: "Wyp\u0142aty dla pracownik\xF3w"
+- id: 38
+  pattern: Agnieszka Warszawska
+  result_value: Reklamy i marketing
+- id: 39
+  pattern: Google
+  result_value: Reklamy i marketing
+- id: 40
+  pattern: Facebook
+  result_value: Reklamy i marketing
+- id: 41
+  pattern: FACEBK
+  result_value: Reklamy i marketing
+- id: 42
+  pattern: Tradedoubler
+  result_value: Reklamy i marketing
+- id: 43
+  pattern: WOO-PERMAL
+  result_value: Reklamy i marketing
+- id: 44
+  pattern: Ceneo.pl
+  result_value: Reklamy i marketing
+- id: 45
+  pattern: cuksy.com
+  result_value: Reklamy i marketing
+- id: 46
+  pattern: "URZ\u0104D SKARBOWY"
+  result_value: Podatki
+- id: 47
+  pattern: "NACZELNIK URZ\u0118DU SKARBOWEGO WARSZAWA BEMOWO"
+  result_value: Podatki
+- id: 48
+  pattern: DIGISTREAM
+  result_value: "Koszty sta\u0142e/must have"
+- id: 49
+  pattern: PZU
+  result_value: "Koszty sta\u0142e/must have"
+- id: 50
+  pattern: GS1PL.COM
+  result_value: "Koszty sta\u0142e/must have"
+- id: 51
+  pattern: .nan
+  result_value: "Koszty sta\u0142e/must have"
+- id: 52
+  pattern: ORANGE
+  result_value: "Koszty sta\u0142e/must have"
+- id: 53
+  pattern: "URZ\u0104D MARSZA\u0141KOWSKI WOJEW\xD3DZTWA MAZOWIECKIEGO"
+  result_value: "Koszty sta\u0142e/must have"
+- id: 54
+  pattern: ZENBOX
+  result_value: "Koszty sta\u0142e/must have"
+- id: 55
+  pattern: TIDIO
+  result_value: "Prowadzenie sklepu, t\u0142umaczenia"
+- id: 56
+  pattern: Baselinker
+  result_value: "Prowadzenie sklepu, t\u0142umaczenia"
+- id: 57
+  pattern: OVH.PL
+  result_value: "Prowadzenie sklepu, t\u0142umaczenia"
+- id: 58
+  pattern: "FUTURA CENTRUM J\u0118ZYKOWE"
+  result_value: "Prowadzenie sklepu, t\u0142umaczenia"
+- id: 59
+  pattern: SEOEXPERT MAREK STOKOWSKI
+  result_value: "Prowadzenie sklepu, t\u0142umaczenia"
+- id: 60
+  pattern: Agit
+  result_value: "Prowadzenie sklepu, t\u0142umaczenia"
+- id: 61
+  pattern: .nan
+  result_value: .nan
+- id: 62
+  pattern: Zwrot
+  result_value: Zwroty/reklamacje
+- id: 63
+  pattern: Return
+  result_value: Zwroty/reklamacje
+- id: 64
+  pattern: SHELL
+  result_value: "Paliwo/samoch\xF3d"
+- id: 65
+  pattern: MOYA
+  result_value: "Paliwo/samoch\xF3d"
+- id: 66
+  pattern: ORLEN
+  result_value: "Paliwo/samoch\xF3d"
+- id: 67
+  pattern: LOTOS
+  result_value: "Paliwo/samoch\xF3d"
+- id: 68
+  pattern: AVIA
+  result_value: "Paliwo/samoch\xF3d"
+- id: 69
+  pattern: STACJA PALIW NR 7578
+  result_value: "Paliwo/samoch\xF3d"
+- id: 70
+  pattern: STACJA PALIW MOC JAKOSC
+  result_value: "Paliwo/samoch\xF3d"
+- id: 71
+  pattern: POLISAONLINE.ERGOHESTIA.P
+  result_value: "Paliwo/samoch\xF3d"
+- id: 72
+  pattern: "VULKANO TOMASZ DRZEWI\u0143SKI"
+  result_value: "Paliwo/samoch\xF3d"
+- id: 73
+  pattern: AUTOGAS SYSTEM
+  result_value: "Paliwo/samoch\xF3d"
+- id: 74
+  pattern: BOOSTE
+  result_value: "Sp\u0142aty po\u017Cyczek, leasingi"
+- id: 75
+  pattern: Leaselink
+  result_value: "Sp\u0142aty po\u017Cyczek, leasingi"
