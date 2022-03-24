@@ -1,2 +1,3 @@
 /venv
 /templates/*
+/src/gdrive_connection/credentials.json
