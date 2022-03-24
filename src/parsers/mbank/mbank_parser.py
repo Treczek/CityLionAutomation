@@ -47,13 +47,14 @@ class MBankParser:
     def data_preparation(self, df: pd.DataFrame) -> pd.DataFrame:
 
         # TODO naprawic debugger
-        def parse_amount(series):
+        def parse_amount(value):
             return (
-                series
-                .str.strip(' EURPLN')
-                .str.replace(" ", "")
-                .str.replace(",", ".")
-                .map(float)
+                float(
+                    value
+                    .strip(' PLNEUR')
+                    .replace(" ", "")
+                    .replace(",", ".")
+                )
             )
 
         mapping = {
@@ -73,7 +74,7 @@ class MBankParser:
             df
             .assign(currency=df['amount'].str[-3:],
                     date=pd.to_datetime(df['date']),
-                    amount=parse_amount(df['amount']),
+                    amount=df['amount'].apply(parse_amount),
                     type=lambda df: np.where(df['amount'] > 0, 'Wpływ', 'Wydatek'),
                     rules_triggered="")
             .drop(columns=['account', 'mbank_category'])
