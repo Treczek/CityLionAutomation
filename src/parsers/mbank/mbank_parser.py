@@ -17,12 +17,11 @@ from src.utils.gsheet_types import datetime_to_excel_date
 
 class MBankParser:
 
-    def __init__(self, csv_file_path: Path):
+    def __init__(self, spreadsheet_name: str):
         self.logger = structlog.getLogger(__name__)
-        self.csv_file_path = csv_file_path
 
         self.nbp_api = NBPApi()
-        self.spreadsheet = GSheetConnection('Analityka finansowa')
+        self.spreadsheet = GSheetConnection(spreadsheet_name)
 
     def parse(self):
 
