@@ -11,13 +11,15 @@ def run():
 
 
 @run.command()
-@click.argument('name')
-@click.option('--verbose', default=3)
+@click.argument("name")
+@click.option("--verbose", default=3)
 def mbank_parse(**kwargs):
-    setup_logging(kwargs['verbose'])
-    MBankParser(spreadsheet_name=kwargs['name']).parse()
+    setup_logging(kwargs["verbose"])
+    MBankParser(spreadsheet_name=kwargs["name"]).parse()
     return 1
 
 
-if __name__ == '__main__':
-    run()
+if __name__ == "__main__":
+    from click.testing import CliRunner
+    runner = CliRunner()
+    runner.invoke(mbank_parse, ['Analityka finansowa'])

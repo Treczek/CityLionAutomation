@@ -31,7 +31,9 @@ def apply_steps(steps, apply_to=None, steps_name=None, logger=None, verbose=True
 
     # Logging how much time every step take
     if verbose:
-        logger.info(f"\n{'#'*25} {steps_name if steps_name else 'Runtimes'} per step in seconds {'#'*25}")
+        logger.info(
+            f"\n{'#'*25} {steps_name if steps_name else 'Runtimes'} per step in seconds {'#'*25}"
+        )
         run_times_dict, total_time = steps.get_run_times()
         for step, runtime in run_times_dict.items():
             logger.info(f"{step} - {runtime}")
@@ -44,6 +46,7 @@ class Step:
     """
     Single step with function and keyword arguments that will be used if called
     """
+
     def __init__(self, function, kwargs=None):
         """
         :param function: function object that will be used while calling step
@@ -58,7 +61,9 @@ class Step:
         Simply running held function with its parameters on given object, and timing it
         """
         start_time = perf_counter()
-        result = self.function(obj, **self.kwargs) if self.kwargs else self.function(obj)
+        result = (
+            self.function(obj, **self.kwargs) if self.kwargs else self.function(obj)
+        )
         self.elapsed_time = round(perf_counter() - start_time, 3)
         return result
 
@@ -66,8 +71,9 @@ class Step:
         return repr(self)
 
     def __repr__(self):
-        return f"{self.function.__name__}" + \
-                             (f" with arguments: {self.kwargs}." if self.kwargs else " with no arguments.")
+        return f"{self.function.__name__}" + (
+            f" with arguments: {self.kwargs}." if self.kwargs else " with no arguments."
+        )
 
     def __iter__(self):
         return self._step_generator()
@@ -94,6 +100,7 @@ class Steps:
     """
     Sequence based list of Step objects. For more information refer to the module documentation on top of this module.
     """
+
     def __init__(self, steps):
         self._steps = [Step(func, args) for func, args in steps]
 
@@ -122,7 +129,12 @@ class Steps:
 
     def __repr__(self):
         description = "\n".join([f"{step}" for step in self._steps])
-        elapsed_time = "\n".join([f"{step.function.__name__} - {step.elapsed_time} sec" for step in self._steps])
+        elapsed_time = "\n".join(
+            [
+                f"{step.function.__name__} - {step.elapsed_time} sec"
+                for step in self._steps
+            ]
+        )
         return f"{description}\n\n{elapsed_time}"
 
     def __iter__(self):
@@ -162,8 +174,10 @@ class Steps:
         If steps has been already called, you can check the run times of specific steps or total time elapsed.
         """
 
-        run_time_dict = \
-            {f'{step_no:02d}-{step.function.__name__}': step.elapsed_time for step_no, step in enumerate(self._steps)}
+        run_time_dict = {
+            f"{step_no:02d}-{step.function.__name__}": step.elapsed_time
+            for step_no, step in enumerate(self._steps)
+        }
 
         if any([isinstance(run_time, str) for run_time in run_time_dict.values()]):
             total_time = None
