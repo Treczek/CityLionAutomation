@@ -1,5 +1,4 @@
 from src.parsers.mbank.mbank_parser import MBankParser
-from pathlib import Path
 import click
 
 from src.utils.configure_logging import setup_logging
@@ -22,4 +21,5 @@ def mbank_parse(**kwargs):
 if __name__ == "__main__":
     from click.testing import CliRunner
     runner = CliRunner()
-    runner.invoke(mbank_parse, ['Analityka finansowa'])
+    result = runner.invoke(mbank_parse, ['Analityka finansowa'])
+    print(result)

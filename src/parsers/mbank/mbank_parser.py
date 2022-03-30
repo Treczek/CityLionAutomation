@@ -13,7 +13,7 @@ from src.utils.gsheet_types import datetime_to_excel_date
 
 # TODO dodac walidacje na zdublowane reguly
 # TODO dodac grupowanie niezmapowanych po przychodzie
-# TODO poprawienie indeksowania reguly
+# TODO dodac zamrozenie w tabelkach z regulami
 
 
 class MBankParser:
@@ -24,7 +24,7 @@ class MBankParser:
         self.spreadsheet = GSheetConnection(spreadsheet_name)
 
         self.csv_file_path = Path(
-            "/Users/tomasz.reczek/Projekty/CityLionParser/templates/lista_operacji_210228_220228_202202282035279836.csv"
+            "/Users/tomasz.reczek/Projekty/CityLionParser/templates/lista_operacji_200329_220329_202203292015396277.csv"
         )
 
     def parse(self):
@@ -62,17 +62,22 @@ class MBankParser:
             "level_0": "id",
         }
 
-        df = df.reset_index().reset_index()
+        df = df.reset_index()
         df.columns = [mapping.get(col) for col in df.columns]
         df = df.dropna(axis=1)
+        df = (
+            df
+            .assign(currency=df["amount"].str[-3:],
+                    date=pd.to_datetime(df["date"]),
+                    amount=df["amount"].apply(parse_amount),
+                    type=lambda df: np.where(df["amount"] > 0, "Wpływ", "Wydatek"),
+                    category='Not mapped',
+                    rules_triggered="")
+            .drop(columns=["account"])
+            .sort_values('date', ascending=True)
+        )
 
-        return df.assign(
-            currency=df["amount"].str[-3:],
-            date=pd.to_datetime(df["date"]),
-            amount=df["amount"].apply(parse_amount),
-            type=lambda df: np.where(df["amount"] > 0, "Wpływ", "Wydatek"),
-            rules_triggered="",
-        ).drop(columns=["account", "mbank_category"])
+        return df.assign(id=range(df.shape[0]))
 
     def calculate_currencies(self, df) -> pd.DataFrame:
         date_range = pd.date_range(df.date.min(), df.date.max())
@@ -105,20 +110,24 @@ class MBankParser:
         def fill_categories(
             df: pd.DataFrame, mapping_rule: MappingRule
         ) -> pd.DataFrame:
-            mask = (
-                df["description"]
-                .map(str)
-                .str.lower()
-                .str.contains(mapping_rule.pattern.lower(), regex=False)
-            )
+            mask = mapping_rule.create_mask(df)
             if mask.sum() == 0:
                 self.logger.warning(
-                    "Rule did not match any record", pattern=mapping_rule.pattern
+                    "Rule did not match any record", mapping_rule=mapping_rule
                 )
                 return df
-            df.loc[mask, "category"] = mapping_rule.result_value
+            df.loc[mask, 'category'] = mapping_rule.result_value
             df.loc[mask, "rules_triggered"] += f" {mapping_rule.id}"
             return df
+
+        def transform_row_into_mapping_rule(dct: dict) -> dict:
+            for key in list(dct.keys())[::-1]:
+                if key not in ['id', 'result_value']:
+                    if dct[key]:
+                        dct[key] = {'name': key, 'value': dct[key]}
+                    else:
+                        del dct[key]
+            return dct
 
         rules = self.spreadsheet["ParserPatternRules"].get_data()
 
@@ -126,12 +135,11 @@ class MBankParser:
         rules['id'] = pd.Series(rules.index).map(int)
         self.spreadsheet['ParserPatternRules'].update_data(rules)
 
+        mapping_rules = [transform_row_into_mapping_rule(dct) for dct in pd.DataFrame(rules).to_dict("records")]
         mapping_rules = MappingRules(
-            mapping_rules=pd.DataFrame(rules)
-            [["id", "pattern", "result_value"]]
-            .to_dict("records")
+            mapping_rules=mapping_rules
         )
-        self.logger.info(f"Fetched {len(mapping_rules.mapping_rules)} pattern rules")
+        self.logger.info(f"Fetched {len(mapping_rules.mapping_rules)} mapping rules")
 
         for mapping_rule in mapping_rules.mapping_rules:
             df = fill_categories(df, mapping_rule)
@@ -190,6 +198,7 @@ class MBankParser:
                 "description",
                 "type",
                 "category",
+                "mbank_category",
                 "rules_triggered",
                 "EUR",
                 "PLN",
@@ -206,9 +215,10 @@ class MBankParser:
         for id, rules in duplicated_rules.iteritems():
             if "Index" in rules:
                 continue
+            # TODO do przepisania po implementacji wszystkich filtrow
             pattern_mask = pattern_rules.id.isin(map(int, rules.split(" ")))
             if pattern_rules.loc[pattern_mask, "result_value"].nunique() > 1:
-                patterns = pattern_rules.loc[pattern_mask, "pattern"].unique()
+                patterns = pattern_rules.loc[pattern_mask].to_dict()
                 result_values = pattern_rules.loc[pattern_mask, "result_value"].unique()
                 self.logger.warning(
                     "More then one rule mapped to transaction",
