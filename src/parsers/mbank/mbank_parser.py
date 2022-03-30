@@ -37,6 +37,7 @@ class MBankParser:
             (self.assign_manual_categories, {}),
             (self.format_before_pushing, {}),
             (self.check_double_entries, {}),
+            (self.save_not_mapped_records, {}),
             (self.push_processed_data, {}),
             (self.format_after_pushing, {}),
         ]
@@ -228,6 +229,23 @@ class MBankParser:
                 )
 
         return df
+
+    def save_not_mapped_records(self, df: pd.DataFrame) -> pd.DataFrame:
+
+        not_mapped_worksheet = self.spreadsheet['NotMapped']
+
+        not_mapped = (
+            df
+            .query('category == "Not mapped"')
+            .assign(abs_value=lambda df: abs(df['PLN']))
+            .sort_values('abs_value', ascending=False)
+        )
+
+        not_mapped_worksheet.worksheet.clear()
+        not_mapped_worksheet.update_data(not_mapped)
+
+        return df
+
 
     def push_processed_data(self, df: pd.DataFrame):
         ws = self.spreadsheet["ParsedData"]

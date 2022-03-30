@@ -66,6 +66,7 @@ class GSheetConnection:
                     sheet_name=sheet_name,
                 )
                 raise
+
         return sheet
 
 
