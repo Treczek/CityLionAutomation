@@ -11,11 +11,6 @@ from src.utils.steps import apply_steps
 from src.utils.gsheet_types import datetime_to_excel_date
 
 
-# TODO dodac walidacje na zdublowane reguly
-# TODO dodac grupowanie niezmapowanych po przychodzie
-# TODO dodac zamrozenie w tabelkach z regulami
-
-
 class MBankParser:
     def __init__(self, spreadsheet_name: str):
         self.logger = structlog.getLogger(__name__)
@@ -32,6 +27,7 @@ class MBankParser:
         steps = [
             (self.load_bank_billing, {}),
             (self.data_preparation, {}),
+            (self.add_manual_entries, {}),
             (self.calculate_currencies, {}),
             (self.assign_initial_categories, {}),
             (self.assign_manual_categories, {}),
@@ -74,14 +70,28 @@ class MBankParser:
                     type=lambda df: np.where(df["amount"] > 0, "Wpływ", "Wydatek"),
                     category='Not mapped',
                     rules_triggered="")
-            .drop(columns=["account"])
             .sort_values('date', ascending=True)
         )
 
         return df.assign(id=range(df.shape[0]))
 
+    def add_manual_entries(self, df: pd.DataFrame) -> pd.DataFrame:
+
+        manual_entries = self.spreadsheet["ManualEntries"].get_data()
+
+        manual_entries = (
+            manual_entries
+            .assign(date=pd.to_datetime(manual_entries["date"]),
+                    mbank_category='Manual entry',
+                    type=np.where(manual_entries['amount'] > 0, 'Wpływ', 'Wydatek'),
+                    rules_triggered="",
+                    id=range(df.shape[0], df.shape[0] + manual_entries.shape[0]))
+        )
+
+        return pd.concat([df, manual_entries])
+
     def calculate_currencies(self, df) -> pd.DataFrame:
-        date_range = pd.date_range(df.date.min(), df.date.max())
+        date_range = pd.date_range(df.date.min(), min(df.date.max(), pd.Timestamp.today()))
         all_dates = pd.DataFrame(date_range).rename(columns={0: "all_dates"})
 
         rates = pd.merge_asof(
@@ -108,10 +118,15 @@ class MBankParser:
         return df
 
     def assign_initial_categories(self, df: pd.DataFrame) -> pd.DataFrame:
+
+        mappable = (df['mbank_category'] != 'Manual entry')
+
         def fill_categories(
             df: pd.DataFrame, mapping_rule: MappingRule
         ) -> pd.DataFrame:
-            mask = mapping_rule.create_mask(df)
+
+            mask = mapping_rule.create_mask(df) & mappable
+
             if mask.sum() == 0:
                 self.logger.warning(
                     "Rule did not match any record", mapping_rule=mapping_rule
@@ -130,11 +145,11 @@ class MBankParser:
                         del dct[key]
             return dct
 
-        rules = self.spreadsheet["ParserPatternRules"].get_data()
+        rules = self.spreadsheet["PatternRules"].get_data()
 
         # Updating ids
         rules['id'] = pd.Series(rules.index).map(int)
-        self.spreadsheet['ParserPatternRules'].update_data(rules)
+        self.spreadsheet['PatternRules'].update_data(rules)
 
         mapping_rules = [transform_row_into_mapping_rule(dct) for dct in pd.DataFrame(rules).to_dict("records")]
         mapping_rules = MappingRules(
@@ -164,10 +179,10 @@ class MBankParser:
             df.loc[mask, "rules_triggered"] = f"Index rule {mapping_rule.id} "
             return df
 
-        rules = self.spreadsheet["ParserIndexRules"].get_data()
+        rules = self.spreadsheet["IndexRules"].get_data()
         if rules.id.duplicated().sum() > 0:
             self.logger.warning(
-                'Your `ParserIndexRules` worksheet contains mutliple ids - parser used only the last one of each.',
+                'Your `IndexRules` worksheet contains mutliple ids - parser used only the last one of each.',
                 ids=rules.loc[rules.id.duplicated(), 'id']
             )
 
@@ -209,7 +224,7 @@ class MBankParser:
 
     def check_double_entries(self, df: pd.DataFrame) -> pd.DataFrame:
 
-        pattern_rules = self.spreadsheet["ParserPatternRules"].get_data()
+        pattern_rules = self.spreadsheet["PatternRules"].get_data()
 
         mask = df["rules_triggered"].str.split(" ").map(len) >= 2
         duplicated_rules = df.loc[mask, "rules_triggered"].drop_duplicates()
@@ -245,7 +260,6 @@ class MBankParser:
         not_mapped_worksheet.update_data(not_mapped)
 
         return df
-
 
     def push_processed_data(self, df: pd.DataFrame):
         ws = self.spreadsheet["ParsedData"]
