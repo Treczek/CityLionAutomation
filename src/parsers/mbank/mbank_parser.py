@@ -41,37 +41,38 @@ class MBankParser:
         apply_steps(steps, logger=self.logger)
 
     def load_bank_billing(self, dummy=None) -> pd.DataFrame:
-        # TODO wczytywanie ze spreadsheet
-        return pd.read_csv(
-            self.csv_file_path, sep=";", encoding="windows-1250", skiprows=27
-        )
+        billing = self.spreadsheet['MbankBilling'].worksheet.get_all_values()[28:]
+        billing_per_record = [line[0].split(";")[:5] for line in billing]
+        return pd.DataFrame(data=billing_per_record[1:], columns=billing_per_record[0])
 
     def data_preparation(self, df: pd.DataFrame) -> pd.DataFrame:
         def parse_amount(value):
             return float(value.strip(" PLNEUR").replace(" ", "").replace(",", "."))
 
         mapping = {
-            "index": "date",
-            "#Data operacji": "description",
-            "#Opis operacji": "account",
-            "#Rachunek": "mbank_category",
-            "#Kategoria": "amount",
+            "#Data operacji": "date",
+            "#Opis operacji": "description",
+            "#Rachunek": "account",
+            "#Kategoria": "mbank_category",
+            "#Kwota": "amount",
             "level_0": "id",
         }
 
-        df = df.reset_index()
         df.columns = [mapping.get(col) for col in df.columns]
         df = df.dropna(axis=1)
         df = (
-            df
-            .assign(currency=df["amount"].str[-3:],
-                    date=pd.to_datetime(df["date"]),
-                    amount=df["amount"].apply(parse_amount),
-                    type=lambda df: np.where(df["amount"] > 0, "Wpływ", "Wydatek"),
-                    category='Not mapped',
-                    rules_triggered="")
-            .sort_values('date', ascending=True)
+                df
+                .assign(currency=df["amount"].str[-3:],
+                        date=pd.to_datetime(df["date"]),
+                        amount=df["amount"].apply(parse_amount),
+                        type=lambda df: np.where(df["amount"] > 0, "Wpływ", "Wydatek"),
+                        category='Not mapped',
+                        rules_triggered="")
+                .sort_values(['date', 'description', 'amount'], ascending=True)
         )
+
+        df[['description', 'account', 'mbank_category']] = df[['description', 'account', 'mbank_category']].applymap(
+            lambda v: v[1:-1])
 
         return df.assign(id=range(df.shape[0]))
 
@@ -81,11 +82,11 @@ class MBankParser:
 
         manual_entries = (
             manual_entries
-            .assign(date=pd.to_datetime(manual_entries["date"]),
-                    mbank_category='Manual entry',
-                    type=np.where(manual_entries['amount'] > 0, 'Wpływ', 'Wydatek'),
-                    rules_triggered="",
-                    id=range(df.shape[0], df.shape[0] + manual_entries.shape[0]))
+                .assign(date=pd.to_datetime(manual_entries["date"]),
+                        mbank_category='Manual entry',
+                        type=np.where(manual_entries['amount'] > 0, 'Wpływ', 'Wydatek'),
+                        rules_triggered="",
+                        id=range(df.shape[0], df.shape[0] + manual_entries.shape[0]))
         )
 
         return pd.concat([df, manual_entries])
@@ -122,7 +123,7 @@ class MBankParser:
         mappable = (df['mbank_category'] != 'Manual entry')
 
         def fill_categories(
-            df: pd.DataFrame, mapping_rule: MappingRule
+                df: pd.DataFrame, mapping_rule: MappingRule
         ) -> pd.DataFrame:
 
             mask = mapping_rule.create_mask(df) & mappable
@@ -166,7 +167,7 @@ class MBankParser:
     def assign_manual_categories(self, df: pd.DataFrame) -> pd.DataFrame:
         # TODO DRY
         def fill_categories(
-            df: pd.DataFrame, mapping_rule: MappingRule
+                df: pd.DataFrame, mapping_rule: MappingRule
         ) -> pd.DataFrame:
 
             mask = df["id"].map(int) == mapping_rule.id
@@ -188,8 +189,8 @@ class MBankParser:
 
         mapping_rules = (
             pd.DataFrame(rules)
-            .assign(id=lambda df: df["id"].map(int))[["id", "result_value"]]
-            .to_dict("records")
+                .assign(id=lambda df: df["id"].map(int))[["id", "result_value"]]
+                .to_dict("records")
         )
         mapping_rules = MappingRules(mapping_rules=mapping_rules)
         for mapping_rule in mapping_rules.mapping_rules:
@@ -204,6 +205,7 @@ class MBankParser:
         df["date"] = df["date"].apply(datetime_to_excel_date)
         df["category"] = df["category"].fillna("Not mapped")
         df[["EUR", "PLN"]] = df[["EUR", "PLN"]].applymap(float)
+        df['PLN abs'] = abs(df['PLN'])
 
         return df[
             [
@@ -218,6 +220,7 @@ class MBankParser:
                 "rules_triggered",
                 "EUR",
                 "PLN",
+                'PLN abs',
                 "currency",
             ]
         ]
@@ -251,9 +254,9 @@ class MBankParser:
 
         not_mapped = (
             df
-            .query('category == "Not mapped"')
-            .assign(abs_value=lambda df: abs(df['PLN']))
-            .sort_values('abs_value', ascending=False)
+                .query('category == "Not mapped"')
+                .assign(abs_value=lambda df: abs(df['PLN']))
+                .sort_values('abs_value', ascending=False)
         )
 
         not_mapped_worksheet.worksheet.clear()
