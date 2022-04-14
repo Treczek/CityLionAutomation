@@ -204,6 +204,7 @@ class MBankParser:
         df["date"] = df["date"].apply(datetime_to_excel_date)
         df["category"] = df["category"].fillna("Not mapped")
         df[["EUR", "PLN"]] = df[["EUR", "PLN"]].applymap(float)
+        df['PLN abs'] = abs(df['PLN'])
 
         return df[
             [
@@ -218,6 +219,7 @@ class MBankParser:
                 "rules_triggered",
                 "EUR",
                 "PLN",
+                'PLN abs',
                 "currency",
             ]
         ]
