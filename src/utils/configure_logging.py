@@ -7,9 +7,7 @@ import structlog
 LOGGING_CONFIG = dict(
     version=1,
     disable_existing_loggers=True,
-    loggers={
-        "": {"level": "INFO", "handlers": ["console"]},
-    },
+    loggers={"": {"level": "INFO", "handlers": ["console"]},},
     handlers={
         "console": {
             "class": "logging.StreamHandler",

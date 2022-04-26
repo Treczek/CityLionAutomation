@@ -69,6 +69,10 @@ class GSheetConnection:
 
         return sheet
 
+    @property
+    def worksheets(self):
+        return [sh.title for sh in self.gc.openall()]
+
 
 class GWorksheet:
     def __init__(self, worksheet):
