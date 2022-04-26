@@ -44,7 +44,7 @@ class NumericalMappingField(MappingField):
             "<": operator.lt,
             ">=": operator.ge,
             "<=": operator.le,
-            "!=": operator.ne
+            "!=": operator.ne,
         }
 
         if type(self.value) == str:
@@ -52,7 +52,7 @@ class NumericalMappingField(MappingField):
                 sign, comparison_value = self.value.split(" ")
                 if sign not in operator_signs:
                     raise MaskCreationException(
-                        f'Operator sign {sign} cannot be used. Possible values: {list(operator_signs.keys())}'
+                        f"Operator sign {sign} cannot be used. Possible values: {list(operator_signs.keys())}"
                     )
                 return operator_signs[sign](df[self.name], float(comparison_value))
 
@@ -73,11 +73,16 @@ class MappingRule(BaseModel):
     currency: Optional[PatternMappingField]
 
     def create_mask(self, df) -> pd.Series:
-        filters = [attr for attr in self.__dict__ if attr not in ['id', 'result_value'] and getattr(self, attr)]
+        filters = [
+            attr
+            for attr in self.__dict__
+            if attr not in ["id", "result_value"] and getattr(self, attr)
+        ]
         masks = [getattr(self, attr).create_mask(df) for attr in filters]
-        return reduce(np.logical_and, masks, pd.Series([True for _ in range(df.shape[0])]))
+        return reduce(
+            np.logical_and, masks, pd.Series([True for _ in range(df.shape[0])])
+        )
 
 
 class MappingRules(BaseModel):
     mapping_rules: List[MappingRule]
-

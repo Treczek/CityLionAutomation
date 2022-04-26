@@ -20,6 +20,7 @@ def mbank_parse(**kwargs):
 
 if __name__ == "__main__":
     from click.testing import CliRunner
+
     runner = CliRunner()
     result = runner.invoke(mbank_parse, ['Analityka finansowa'])
     print(result)
