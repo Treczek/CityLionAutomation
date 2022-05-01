@@ -1,0 +1,2 @@
+class MaskCreationException(KeyError):
+    pass
