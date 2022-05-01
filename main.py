@@ -22,5 +22,5 @@ if __name__ == "__main__":
     from click.testing import CliRunner
 
     runner = CliRunner()
-    result = runner.invoke(mbank_parse, ['Analityka finansowa'])
+    result = runner.invoke(mbank_parse, ['TiA finanse'])
     print(result)

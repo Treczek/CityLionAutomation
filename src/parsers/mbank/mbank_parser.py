@@ -25,6 +25,7 @@ class MBankParser:
             (self.calculate_currencies, {}),
             (self.assign_initial_categories, {}),
             (self.assign_manual_categories, {}),
+            (self.add_upper_categories, {}),
             (self.format_before_pushing, {}),
             (self.check_double_entries, {}),
             (self.save_not_mapped_records, {}),
@@ -218,6 +219,8 @@ class MBankParser:
         df[["EUR", "PLN"]] = df[["EUR", "PLN"]].applymap(float)
         df["PLN abs"] = abs(df["PLN"])
 
+        detailed_categories = [col for col in df.columns if 'level' in col]
+
         return df[
             [
                 "id",
@@ -227,6 +230,7 @@ class MBankParser:
                 "description",
                 "type",
                 "category",
+                *detailed_categories,
                 "mbank_category",
                 "rules_triggered",
                 "EUR",
@@ -272,6 +276,15 @@ class MBankParser:
         not_mapped_worksheet.worksheet.clear()
         not_mapped_worksheet.update_data(not_mapped)
 
+        return df
+
+    def add_upper_categories(self, df: pd.DataFrame) -> pd.DataFrame:
+
+        mapping = self.spreadsheet["CategoryMapping"].get_data()
+        for column in mapping.columns:
+            if 'level' in column:
+                current_mapping = mapping[['Detailed', column]].set_index('Detailed').to_dict()[column]
+                df[column] = df['category'].map(current_mapping).fillna('Without mapping')
         return df
 
     def push_processed_data(self, df: pd.DataFrame):
