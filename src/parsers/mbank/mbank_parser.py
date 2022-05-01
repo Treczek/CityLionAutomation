@@ -1,12 +1,12 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 import structlog
 
-from src.parsers.mbank.mapping_rules import MappingRule, MappingRules
 from src.api.nbp_api import NBPApi
 from src.gdrive_connection.base import GSheetConnection
-from src.utils.steps import apply_steps
+from src.parsers.mbank.mapping_rules import MappingRule, MappingRules
 from src.utils.gsheet_types import datetime_to_excel_date
+from src.utils.steps import apply_steps
 
 
 class MBankParser:
@@ -15,6 +15,12 @@ class MBankParser:
 
         self.nbp_api = NBPApi()
         self.spreadsheet = GSheetConnection(spreadsheet_name)
+
+        self.warnings = []
+
+    def _warn_with_caching(self, message):
+        self.warnings.append(message)
+        self.logger.warning(message)
 
     def parse(self):
 
@@ -31,6 +37,7 @@ class MBankParser:
             (self.save_not_mapped_records, {}),
             (self.push_processed_data, {}),
             (self.format_after_pushing, {}),
+            (self.push_warnings, {})
         ]
 
         apply_steps(steps, logger=self.logger)
@@ -53,6 +60,7 @@ class MBankParser:
         for to_skip, line in enumerate(billing):
             if line[0] == "#Data operacji":
                 break
+
         billing = billing[to_skip:]
         return pd.DataFrame(data=billing[1:], columns=billing[0])
 
@@ -138,8 +146,9 @@ class MBankParser:
             mask = mapping_rule.create_mask(df) & mappable
 
             if mask.sum() == 0:
-                self.logger.warning(
-                    "Rule did not match any record", mapping_rule=mapping_rule
+
+                self._warn_with_caching(
+                    f"Rule did not match any record. Rule: {str(mapping_rule)}."
                 )
                 return df
             df.loc[mask, "category"] = mapping_rule.result_value
@@ -183,8 +192,8 @@ class MBankParser:
 
             mask = df["id"].map(int) == mapping_rule.id
             if mask.sum() == 0:
-                self.logger.warning(
-                    "Index rule did not match any record", pattern=mapping_rule.id
+                self._warn_with_caching(
+                    f"Index rule did not match any record. Rule ID: {mapping_rule.id}"
                 )
                 return df
             df.loc[mask, "category"] = mapping_rule.result_value
@@ -194,9 +203,10 @@ class MBankParser:
         rules = self.spreadsheet["IndexRules"].get_data()
         rules = rules[['id', 'result_value']].query("id != ''").dropna()
         if rules.id.duplicated().sum() > 0:
-            self.logger.warning(
-                "Your `IndexRules` worksheet contains mutliple ids - parser used only the last one of each.",
-                ids=rules.loc[rules.id.duplicated(), "id"],
+            duplicated_ids = rules.loc[rules.id.duplicated(), "id"].values.tolist()
+            self._warn_with_caching(
+                f"Your `IndexRules` worksheet contains duplicated ids - parser used only the last one of each. \
+Duplicated IDs: {', '.join(map(str, duplicated_ids))}"
             )
 
         mapping_rules = (
@@ -252,13 +262,8 @@ class MBankParser:
             # TODO do przepisania po implementacji wszystkich filtrow
             pattern_mask = pattern_rules.id.isin(map(int, rules.split(" ")))
             if pattern_rules.loc[pattern_mask, "result_value"].nunique() > 1:
-                patterns = pattern_rules.loc[pattern_mask].to_dict()
-                result_values = pattern_rules.loc[pattern_mask, "result_value"].unique()
-                self.logger.warning(
-                    "More then one rule mapped to transaction",
-                    id=id,
-                    rules=rules,
-                    patterns=list(zip(patterns, result_values)),
+                self._warn_with_caching(
+                    f"More then one rule mapped to the transaction. Transaction id {id}. Rule ids {rules}."
                 )
 
         return df
@@ -316,3 +321,8 @@ class MBankParser:
         ]
 
         self.spreadsheet.spreadsheet.batch_update({"requests": requests})
+
+    def push_warnings(self, dummy=None):
+        logging_worksheet = self.spreadsheet['Warnings']
+        logging_worksheet.worksheet.clear()
+        logging_worksheet.update_data(pd.DataFrame(self.warnings, columns=['Warnings']))

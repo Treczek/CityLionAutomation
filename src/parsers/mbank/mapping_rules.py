@@ -13,11 +13,14 @@ from src.exceptions import MaskCreationException
 class MappingField(ABC, BaseModel):
 
     name: str
-    value: Union[str | int]
+    value: Union[str, int]
 
     @abstractmethod
     def create_mask(self, df: pd.DataFrame) -> pd.Series:
-        raise NotImplemented
+        raise NotImplementedError
+
+    def __repr__(self):
+        return self.value
 
 
 class PatternMappingField(MappingField):
@@ -35,7 +38,7 @@ class PatternMappingField(MappingField):
 
 class NumericalMappingField(MappingField):
     name: str
-    value: str | float
+    value: Union[str, float]
 
     def create_mask(self, df: pd.DataFrame) -> pd.Series:
 
@@ -47,14 +50,13 @@ class NumericalMappingField(MappingField):
             "!=": operator.ne,
         }
 
-        if type(self.value) == str:
-            if any(char in self.value for char in "!<>="):
-                sign, comparison_value = self.value.split(" ")
-                if sign not in operator_signs:
-                    raise MaskCreationException(
-                        f"Operator sign {sign} cannot be used. Possible values: {list(operator_signs.keys())}"
-                    )
-                return operator_signs[sign](df[self.name], float(comparison_value))
+        if type(self.value) == str and any(char in self.value for char in "!<>="):
+            sign, comparison_value = self.value.split(" ")
+            if sign not in operator_signs:
+                raise MaskCreationException(
+                    f"Operator sign {sign} cannot be used. Possible values: {list(operator_signs.keys())}"
+                )
+            return operator_signs[sign](df[self.name], float(comparison_value))
 
         return df[self.name] == float(self.value)
 
@@ -82,6 +84,10 @@ class MappingRule(BaseModel):
         return reduce(
             np.logical_and, masks, pd.Series([True for _ in range(df.shape[0])])
         )
+
+    def __str__(self):
+        not_none_params = {k: v for k, v in self.__dict__.items() if v is not None}
+        return f"{type(self).__name__} - {not_none_params}"
 
 
 class MappingRules(BaseModel):

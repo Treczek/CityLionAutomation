@@ -1,26 +1,21 @@
+import argparse
+import sys
+from typing import Optional, Sequence
 from src.parsers.mbank.mbank_parser import MBankParser
-import click
 
 from src.utils.configure_logging import setup_logging
 
+parser = argparse.ArgumentParser(description='Parser')
+parser.add_argument('-v', '--verbose', help='Verbose of logging module', default=3)
+parser.add_argument('spreadsheet_name', help='Spreadsheet name that needs to be parsed')
 
-@click.group()
-def run():
-    pass
 
-
-@run.command()
-@click.argument("name")
-@click.option("--verbose", default=3)
-def mbank_parse(**kwargs):
-    setup_logging(kwargs["verbose"])
-    MBankParser(spreadsheet_name=kwargs["name"]).parse()
-    return 1
+def main(argv: Optional[Sequence[str]] = None) -> int:
+    setup_logging(args.verbose)
+    MBankParser(args.spreadsheet_name).parse()
+    return 0
 
 
 if __name__ == "__main__":
-    from click.testing import CliRunner
-
-    runner = CliRunner()
-    result = runner.invoke(mbank_parse, ['TiA finanse'])
-    print(result)
+    args = argparse.Namespace(spreadsheet_name='Analityka finansowa', verbose=1)
+    exit(main(args))

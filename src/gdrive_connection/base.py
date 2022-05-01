@@ -16,9 +16,9 @@ class GSheetConnection:
 
     def __getitem__(self, sheet_name):
         if type(sheet_name) == str:
-            sheet = self._get_worksheet(sheet_name, False)
+            sheet = self.get_worksheet(sheet_name, False)
         else:
-            raise NotImplemented(f"{type(sheet_name)} is not implemented at the moment")
+            raise NotImplementedError(f"{type(sheet_name)} is not implemented at the moment")
         self.logger.debug("Worksheet found and hooked on.", worksheet=sheet)
         return GWorksheet(sheet)
 
@@ -41,7 +41,7 @@ class GSheetConnection:
 
         return spreadsheet
 
-    def _get_worksheet(
+    def get_worksheet(
         self, sheet_name: str, create_if_missing: bool
     ) -> gspread.Worksheet:
         try:
