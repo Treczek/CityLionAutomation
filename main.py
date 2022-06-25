@@ -17,5 +17,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 
 if __name__ == "__main__":
-    args = argparse.Namespace(spreadsheet_name='Analityka finansowa', verbose=1)
+    args = argparse.Namespace(spreadsheet_name='TiA finanse', verbose=3)
+    # args = argparse.Namespace(spreadsheet_name='Analityka finansowa', verbose=3)
     exit(main(args))

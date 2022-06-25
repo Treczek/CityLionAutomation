@@ -28,12 +28,13 @@ class PatternMappingField(MappingField):
     value: str
 
     def create_mask(self, df: pd.DataFrame) -> pd.Series:
-        return (
+        mask = (
             df[self.name]
             .map(str)
             .str.lower()
             .str.contains(self.value.lower(), regex=False)
         )
+        return mask
 
 
 class NumericalMappingField(MappingField):
@@ -81,6 +82,7 @@ class MappingRule(BaseModel):
             if attr not in ["id", "result_value"] and getattr(self, attr)
         ]
         masks = [getattr(self, attr).create_mask(df) for attr in filters]
+
         return reduce(
             np.logical_and, masks, pd.Series([True for _ in range(df.shape[0])])
         )

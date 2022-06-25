@@ -1,0 +1,12 @@
+version: '2'
+services:
+  api:
+    container_name: api
+    build:
+      context: ./src
+      dockerfile: ./Dockerfile
+    expose:
+      - "8000"
+    ports:
+      - "8000:8000"
+    command: ["python", "-m", "uvicorn", "webserver.app:app", "--host", "0.0.0.0", "--port", "8000"]
