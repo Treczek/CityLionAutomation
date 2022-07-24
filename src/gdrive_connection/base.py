@@ -83,4 +83,4 @@ class GWorksheet:
         return pd.DataFrame(self.worksheet.get_all_records())
 
     def update_data(self, data):
-        self.worksheet.update([data.columns.values.tolist()] + data.values.tolist())
+        self.worksheet.update([data.columns.values.tolist()] + data.fillna("").values.tolist())
