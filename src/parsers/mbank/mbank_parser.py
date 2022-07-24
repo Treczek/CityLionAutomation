@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import structlog
 
-from src.api.nbp_api import NBPApi
+from src.data_sources import NBPApi, BaselinkerAPI
 from src.gdrive_connection.base import GSheetConnection
 from src.parsers.mbank.mapping_rules import MappingRule, MappingRules
 from src.utils.gsheet_types import datetime_to_excel_date
@@ -14,6 +14,7 @@ class MBankParser:
         self.logger = structlog.getLogger(__name__)
 
         self.nbp_api = NBPApi()
+        self.baselinker_api = BaselinkerAPI()
         self.spreadsheet = GSheetConnection(spreadsheet_name)
 
         self.warnings = []
@@ -224,6 +225,7 @@ Duplicated IDs: {', '.join(map(str, duplicated_ids))}"
     def format_before_pushing(self, df: pd.DataFrame) -> pd.DataFrame:
         df["year"] = df["date"].dt.year
         df["month"] = df["date"].dt.month
+        df['year-month'] = df['date'].dt.strftime("%Y-%m")
         df["date"] = df["date"].apply(datetime_to_excel_date)
         df["category"] = df["category"].fillna("Not mapped")
         df[["EUR", "PLN"]] = df[["EUR", "PLN"]].applymap(float)
@@ -237,6 +239,7 @@ Duplicated IDs: {', '.join(map(str, duplicated_ids))}"
                 "date",
                 "year",
                 "month",
+                'year-month',
                 "description",
                 "type",
                 "category",
