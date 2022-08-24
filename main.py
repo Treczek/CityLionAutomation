@@ -1,5 +1,5 @@
 import argparse
-import sys
+import os
 from typing import Optional, Sequence
 from src.parsers import MBankParser, BaselinkerParser
 
@@ -18,6 +18,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 
 if __name__ == "__main__":
+    # TODO Sortowanie mapy baselinkera
+    # TODO Upewnienie sie ze nie kasujemy juz zmapowanych produktow po usunieciu archiwum
     args = argparse.Namespace(spreadsheet_name='Analityka finansowa', verbose=2)
     # args = argparse.Namespace(spreadsheet_name='TiA finanse', verbose=2)
     exit(main(args))
