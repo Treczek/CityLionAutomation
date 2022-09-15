@@ -13,7 +13,7 @@ parser.add_argument('spreadsheet_name', help='Spreadsheet name that needs to be 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     setup_logging(args.verbose)
     MBankParser(args.spreadsheet_name).parse()
-    BaselinkerParser(args.spreadsheet_name, "APIKEY").parse()
+    BaselinkerParser(args.spreadsheet_name, os.environ['BASELINKER_API']).parse()
     return 0
 
 
