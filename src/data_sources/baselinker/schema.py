@@ -8,7 +8,7 @@ from dateutil.parser import parser
 
 class ProductSchema(BaseModel):
     order_product_id: int = None
-    product_id: int | str = Field(default=999999)
+    product_id: Union[int, str] = Field(default=999999)
     variant_id: str = None
     name: str
     attributes: str = None
