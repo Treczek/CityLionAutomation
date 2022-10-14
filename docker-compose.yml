@@ -13,7 +13,6 @@ x-airflow-common:
     - ./airflow-data/dags:/opt/airflow/dags
     - ./airflow-data/logs:/opt/airflow/logs
     - ./airflow-data/plugins:/opt/airflow/plugins
-    - ./airflow-data/airflow.cfg:/opt/airflow/airflow.cfg
     - /home/req/CityLionAutomation:/opt/airflow/citylion
     - /home/req/.config/gspread:/home/airflow/.config/gspread
   depends_on:
