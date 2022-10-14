@@ -8,3 +8,4 @@
 *.html
 /src/gdrive_connection/credentials.json
 *.pkl
+airflow-data/logs
