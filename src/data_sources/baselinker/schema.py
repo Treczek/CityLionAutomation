@@ -28,7 +28,7 @@ class OrderSchema(BaseModel):
     currency: str
     payment_done: float
     delivery_country: str = None
-    products: List[ProductSchema] | List[List[ProductSchema]]
+    products: Union[List[ProductSchema], List[List[ProductSchema]]]
 
     @classmethod
     @validator('date_confirmed')
