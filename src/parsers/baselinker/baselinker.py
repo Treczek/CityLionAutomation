@@ -47,6 +47,7 @@ class BaselinkerParser:
             (self.cache_the_data, {}),
             (self.merge_mappings, {}),
             (self.refresh_mappings_with_new_products, {}),
+            # (self.format_before_pushing, {}),
             (self.send_data, {})
         ]
 
@@ -102,19 +103,20 @@ class BaselinkerParser:
     def process_the_data(self, orders: pd.DataFrame) -> pd.DataFrame:
         orders = orders.drop_duplicates()
 
-        orders['date_confirmed'] = pd.to_datetime(orders['date_confirmed'], unit='s')
+        orders['date_confirmed'] = pd.to_datetime(orders['date_confirmed'], unit='s').copy()
         orders["year"] = orders["date_confirmed"].dt.year
         orders["month"] = orders["date_confirmed"].dt.month
         orders['year-month'] = orders['date_confirmed'].dt.strftime("%Y-%m")
         orders['date_confirmed'] = orders['date_confirmed'].apply(datetime_to_excel_date)
         orders['delivery_country'] = orders['delivery_country'].fillna("Polska")
         orders['country_iso_code'] = orders['delivery_country'].map(get_country_to_iso_code_map())
+        orders['export'] = orders['country_iso_code'] != 'PL'
 
         return orders
 
     def merge_mappings(self, orders: pd.DataFrame) -> pd.DataFrame:
         product_map = self.spreadsheet["BaselinkerProductMap"].get_data()
-        return orders.merge(product_map.drop(columns='attributes'), how='left', on='name')
+        return orders.merge(product_map.drop(columns=['attributes', 'index']), how='left', on='name')
 
     def refresh_mappings_with_new_products(self, orders: pd.DataFrame) -> pd.DataFrame:
         new_map = (
@@ -130,6 +132,9 @@ class BaselinkerParser:
         ws.update_data(new_map_with_nulls_on_top.fillna(""))
 
         return orders
+
+    def format_before_pushing(self, orders: pd.DataFrame) -> pd.DataFrame:
+        return orders.drop_duplicates(subset=['order_id'])
 
     def send_data(self, orders: pd.DataFrame) -> None:
         ws = self.spreadsheet["BaselinkerData"]

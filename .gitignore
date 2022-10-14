@@ -1,3 +1,10 @@
 /venv
 /templates/*
+.env
+.envrc
+/.idea
+*__pycache__
+*.xml
+*.html
 /src/gdrive_connection/credentials.json
+*.pkl
