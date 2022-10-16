@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-sys.path.append(Path(__file__).parent.parent / 'src')
+sys.path.append(Path(__file__).parent / 'citylion' / 'src')
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
