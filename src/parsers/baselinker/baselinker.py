@@ -119,17 +119,27 @@ class BaselinkerParser:
         return orders.merge(product_map.drop(columns=['attributes', 'index']), how='left', on='name')
 
     def refresh_mappings_with_new_products(self, orders: pd.DataFrame) -> pd.DataFrame:
-        new_map = (
+        current_map = self.spreadsheet["BaselinkerProductMap"].get_data()
+        new_orders = (
             orders[['name', 'attributes', 'master_product', 'battery_type', 'battery_size']]
             .drop_duplicates()
             .reset_index()
-            .sort_values('master_product')
         )
 
-        new_map_with_nulls_on_top = new_map.loc[reversed(new_map.index)]
+        new_map = (
+            pd
+            .concat(
+                [
+                    current_map, new_orders
+                ])
+            .sort_values('name', ascending=False)
+            .drop_duplicates('name')
+            .sort_values("master_product")
+        )
+
         ws = self.spreadsheet["BaselinkerProductMap"]
         ws.worksheet.clear()
-        ws.update_data(new_map_with_nulls_on_top.fillna(""))
+        ws.update_data(new_map.fillna(""))
 
         return orders
 
