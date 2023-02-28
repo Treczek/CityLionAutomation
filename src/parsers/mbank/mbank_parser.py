@@ -67,7 +67,7 @@ class MBankParser:
 
     def data_preparation(self, df: pd.DataFrame) -> pd.DataFrame:
         def parse_amount(value):
-            return float(value.strip(" PLNEUR").replace(" ", "").replace(",", "."))
+            return float(value.strip(" PLNEURDKKSCZ").replace(" ", "").replace(",", "."))
 
         mapping = {
             "#Data operacji": "date",

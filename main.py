@@ -11,6 +11,7 @@ parser.add_argument('spreadsheet_name', help='Spreadsheet name that needs to be 
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
+    args = parser.parse_args(argv)
     setup_logging(args.verbose)
     MBankParser(args.spreadsheet_name).parse()
     BaselinkerParser(args.spreadsheet_name, os.environ['BASELINKER_API']).parse()
@@ -20,6 +21,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 if __name__ == "__main__":
     # TODO Sortowanie mapy baselinkera
     # TODO Upewnienie sie ze nie kasujemy juz zmapowanych produktow po usunieciu archiwum
-    args = argparse.Namespace(spreadsheet_name='Analityka finansowa', verbose=2)
+    # args = argparse.Namespace(spreadsheet_name='Analityka finansowa', verbose=2)
     # args = argparse.Namespace(spreadsheet_name='TiA finanse', verbose=2)
-    exit(main(args))
+    MBankParser('Analityka finansowa').parse()
+    BaselinkerParser('Analityka finansowa', os.environ['BASELINKER_API']).parse()
+    # exit(main(args))
