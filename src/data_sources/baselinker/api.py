@@ -14,13 +14,13 @@ class BaselinkerAPI:
         all_orders = []
 
         header = {'X-BLToken': api_key}
-        params = {'method': 'getOrders'}
+        params = {'method': 'getOrders', "parameters": json.dumps({"get_unconfirmed_orders": True})}
 
         if timestamp:
             params.update(
                 {'parameters': json.dumps({
                     "date_confirmed_from": timestamp,
-                    "get_unconfirmed_orders": False})
+                    "get_unconfirmed_orders": True})
                 }
             )
 
@@ -36,5 +36,4 @@ class BaselinkerAPI:
         if len(json_orders) == 100:
             last_order_timestamp = json_orders[-1]['date_confirmed']
             all_orders.extend(self.get_orders(api_key, timestamp=last_order_timestamp + 1))
-
         return all_orders

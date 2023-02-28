@@ -102,7 +102,6 @@ class BaselinkerParser:
 
     def process_the_data(self, orders: pd.DataFrame) -> pd.DataFrame:
         orders = orders.drop_duplicates()
-
         orders['date_confirmed'] = pd.to_datetime(orders['date_confirmed'], unit='s').copy()
         orders["year"] = orders["date_confirmed"].dt.year
         orders["month"] = orders["date_confirmed"].dt.month
@@ -111,7 +110,6 @@ class BaselinkerParser:
         orders['delivery_country'] = orders['delivery_country'].fillna("Polska")
         orders['country_iso_code'] = orders['delivery_country'].map(get_country_to_iso_code_map())
         orders['export'] = orders['country_iso_code'] != 'PL'
-
         return orders
 
     def merge_mappings(self, orders: pd.DataFrame) -> pd.DataFrame:
@@ -136,11 +134,9 @@ class BaselinkerParser:
             .drop_duplicates('name')
             .sort_values("master_product")
         )
-
         ws = self.spreadsheet["BaselinkerProductMap"]
         ws.worksheet.clear()
         ws.update_data(new_map.fillna(""))
-
         return orders
 
     def format_before_pushing(self, orders: pd.DataFrame) -> pd.DataFrame:
@@ -152,7 +148,6 @@ class BaselinkerParser:
         ws.update_data(orders)
 
     def format_after_pushing(self, dummy=None):
-
         # Date with proper format
         requests = [
             {
