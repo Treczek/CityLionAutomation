@@ -132,6 +132,7 @@ class BaselinkerParser:
                 ])
             .sort_values('name', ascending=False)
             .drop_duplicates('name')
+            .astype({"master_product": str})
             .sort_values("master_product")
         )
         ws = self.spreadsheet["BaselinkerProductMap"]
