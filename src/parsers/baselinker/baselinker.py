@@ -126,10 +126,7 @@ class BaselinkerParser:
 
         new_map = (
             pd
-            .concat(
-                [
-                    current_map, new_orders
-                ])
+            .concat([current_map, new_orders])
             .sort_values('name', ascending=False)
             .drop_duplicates('name')
             .astype({"master_product": str})

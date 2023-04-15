@@ -2,27 +2,40 @@ import argparse
 import os
 from typing import Optional, Sequence
 from src.parsers import MBankParser, BaselinkerParser
-
+from src.scrapers.product_prices_and_availability.controller import PriceAndAvailabilityScraper
 from src.utils.configure_logging import setup_logging
-
-parser = argparse.ArgumentParser(description='Parser')
-parser.add_argument('-v', '--verbose', help='Verbose of logging module', default=3)
-parser.add_argument('spreadsheet_name', help='Spreadsheet name that needs to be parsed')
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
+    parser = argparse.ArgumentParser(
+        description='Run one or more of the three functions: MBankParser, BaselinkerParser or PriceAndAvailabilityScraper.')
+
+    parser.add_argument('-v', '--verbose', help='Verbose of logging module', default=3)
+    parser.add_argument('--worksheet_name_parsers', default='Analityka finansowa',
+                        help='Worksheet name to be processed for MBankParser and BaselinkerParser (default: "Analityka finansowa")')
+    parser.add_argument('--worksheet_name_scraper', default='Nowe Arkusze kalkulacyjne ',
+                        help='Worksheet name to be processed for PriceAndAvailabilityScraper (default: "Nowe Arkusze kalkulacyjne ")')
+    parser.add_argument('--function', choices=['mbank', 'baselinker', 'scraper', 'all'], required=True,
+                        help='Choose which function(s) to run: mbank, baselinker, scraper or all.')
+
     args = parser.parse_args(argv)
     setup_logging(args.verbose)
-    MBankParser(args.spreadsheet_name).parse()
-    BaselinkerParser(args.spreadsheet_name, os.environ['BASELINKER_API']).parse()
+
+    if args.function == 'mbank':
+        MBankParser(args.worksheet_name_parsers).parse()
+    elif args.function == 'baselinker':
+        BaselinkerParser(args.worksheet_name_parsers, os.environ['BASELINKER_API']).parse()
+    elif args.function == 'scraper':
+        PriceAndAvailabilityScraper(args.worksheet_name_scraper).scrape()
+    elif args.function == 'all':
+        MBankParser(args.worksheet_name_parsers).parse()
+        BaselinkerParser(args.worksheet_name_parsers, os.environ['BASELINKER_API']).parse()
+        PriceAndAvailabilityScraper(args.worksheet_name_scraper).scrape()
+    else:
+        print("Invalid function. Choose between 'mbank', 'baselinker', 'scraper', and 'all'.")
+
     return 0
 
 
 if __name__ == "__main__":
-    # TODO Sortowanie mapy baselinkera
-    # TODO Upewnienie sie ze nie kasujemy juz zmapowanych produktow po usunieciu archiwum
-    # args = argparse.Namespace(spreadsheet_name='Analityka finansowa', verbose=2)
-    # args = argparse.Namespace(spreadsheet_name='TiA finanse', verbose=2)
-    MBankParser('Analityka finansowa').parse()
-    BaselinkerParser('Analityka finansowa', os.environ['BASELINKER_API']).parse()
-    # exit(main(args))
+    exit(main())
