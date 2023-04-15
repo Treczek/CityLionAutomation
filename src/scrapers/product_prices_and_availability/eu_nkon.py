@@ -9,7 +9,7 @@ class ScrapedProduct:
     product: str
     url: str
     price: float
-    availability: bool
+    availability: str
 
 
 class ScrapeException(Exception):
@@ -48,4 +48,4 @@ def scrape_availability(soup):
     p_element = soup.find('p', {'class': "availability in-stock"})
     if p_element:
         span_element = p_element.find_all('span')[-1]
-        return span_element.text.strip() == "In stock"
+        return span_element.text.strip()

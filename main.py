@@ -15,7 +15,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         help='Worksheet name to be processed for MBankParser and BaselinkerParser (default: "Analityka finansowa")')
     parser.add_argument('--worksheet_name_scraper', default='Nowe Arkusze kalkulacyjne ',
                         help='Worksheet name to be processed for PriceAndAvailabilityScraper (default: "Nowe Arkusze kalkulacyjne ")')
-    parser.add_argument('--function', choices=['mbank', 'baselinker', 'scraper', 'all'], required=True,
+    parser.add_argument('-f', '--function', choices=['mbank', 'baselinker', 'scraper', 'all'], required=True,
                         help='Choose which function(s) to run: mbank, baselinker, scraper or all.')
 
     args = parser.parse_args(argv)

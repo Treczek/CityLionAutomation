@@ -44,7 +44,7 @@ class PriceAndAvailabilityScraper:
             if url:
                 try:
                     scraped_products.append(scrape_eu_nkon(product, url))
-                    self.logger.info(f"Success - {product} - {url}")
+                    self.logger.info(f"Success - {product}")
                 except ScrapeException:
                     self.logger.warning(f"Failed - {product} - {url}")
         return scraped_products
