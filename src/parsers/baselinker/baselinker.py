@@ -114,15 +114,19 @@ class BaselinkerParser:
 
     def merge_mappings(self, orders: pd.DataFrame) -> pd.DataFrame:
         product_map = self.spreadsheet["BaselinkerProductMap"].get_data()
+        product_map.to_pickle("gs_map.pickle")
+        orders.to_pickle("orders.pickle")
         return orders.merge(product_map.drop(columns=['attributes', 'index']), how='left', on='name')
 
     def refresh_mappings_with_new_products(self, orders: pd.DataFrame) -> pd.DataFrame:
         current_map = self.spreadsheet["BaselinkerProductMap"].get_data()
+        current_map.to_pickle("current_map.pickle")
         new_orders = (
             orders[['name', 'attributes', 'master_product', 'battery_type', 'battery_size']]
             .drop_duplicates()
             .reset_index()
         )
+        new_orders.to_pickle("new_orders.pickle")
 
         new_map = (
             pd
@@ -132,6 +136,7 @@ class BaselinkerParser:
             .astype({"master_product": str})
             .sort_values("master_product")
         )
+        new_map.to_pickle("map_to_upload.pickle")
         ws = self.spreadsheet["BaselinkerProductMap"]
         ws.worksheet.clear()
         ws.update_data(new_map.fillna(""))

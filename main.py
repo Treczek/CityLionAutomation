@@ -38,4 +38,5 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 
 if __name__ == "__main__":
+    BaselinkerParser("Analityka finansowa", os.environ['BASELINKER_API']).parse()
     exit(main())
