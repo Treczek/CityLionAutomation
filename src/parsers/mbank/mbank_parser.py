@@ -97,10 +97,20 @@ class MBankParser:
         if manual_entries.shape == (0, 0):
             return df
 
+        def convert_to_float(value):
+            if isinstance(value, str):
+                value = value.replace('\xa0', '').replace(',', '.')
+                return float(value)
+            else:   
+                value = value / 100
+            return value
+
+
+        manual_entries["amount"] = manual_entries["amount"].map(convert_to_float)
         manual_entries = manual_entries.assign(
             date=pd.to_datetime(manual_entries["date"]),
             mbank_category="Manual entry",
-            type=np.where(manual_entries["amount"] > 0, "Wpływ", "Wydatek"),
+            type=np.where(manual_entries["amount"].map(float) > 0, "Wpływ", "Wydatek"),
             rules_triggered="",
             id=range(df.shape[0], df.shape[0] + manual_entries.shape[0]),
         )
